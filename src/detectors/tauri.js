@@ -27,6 +27,28 @@ function linksWebKit(binaryPath) {
   }
 }
 
+/**
+ * Check if a binary contains Tauri-specific strings (crate paths, symbols).
+ * Tauri v2 embeds web assets directly into the binary via include_dir!,
+ * so we can't rely on external index.html alone.
+ */
+function containsTauriSignature(binaryPath) {
+  try {
+    const output = execFileSync('strings', ['-n', '12', binaryPath], {
+      timeout: 5000,
+      maxBuffer: 2 * 1024 * 1024,
+    }).toString();
+    const markers = [
+      'tauri-runtime-wry',
+      'tauri::',
+      '/tauri-',
+    ];
+    return markers.some((m) => output.includes(m));
+  } catch {
+    return false;
+  }
+}
+
 export function detect(appPath, platform) {
   const evidence = [];
 
@@ -95,10 +117,19 @@ export function detect(appPath, platform) {
       for (const bin of binaries) {
         const binPath = path.join(macosDir, bin);
         const stat = fs.statSync(binPath);
-        if (stat.isFile() && linksWebKit(binPath)) {
+        if (!stat.isFile()) continue;
+
+        if (linksWebKit(binPath)) {
           evidence.push('Links system WebKit.framework (WKWebView)');
-          break;
         }
+
+        // Tauri v2 embeds web assets into the binary — no external index.html.
+        // Fall back to scanning for Tauri crate strings inside the binary.
+        if (containsTauriSignature(binPath)) {
+          evidence.push('Tauri framework signature in binary');
+        }
+
+        if (evidence.length > 0) break;
       }
     } catch {
       // ignore
@@ -128,15 +159,18 @@ export function detect(appPath, platform) {
 
   const hasWebKitLink = evidence.some((e) => e.includes('WebKit.framework'));
   const hasBundledIndex = evidence.some((e) => e.includes('index.html'));
+  const hasTauriSig = evidence.some((e) => e.includes('Tauri framework signature'));
   const hasWebView2 = evidence.includes('WebView2Loader.dll');
 
-  // On macOS, require WebKit link + bundled web assets to claim Tauri.
-  // On Windows, require WebView2.
-  if (!hasWebView2 && !(hasWebKitLink && hasBundledIndex)) return null;
+  // macOS: need (WebKit + index.html) or (WebKit + Tauri signature) or Tauri signature alone
+  // Windows: need WebView2
+  const macOSMatch = hasWebKitLink && (hasBundledIndex || hasTauriSig);
+  if (!hasWebView2 && !macOSMatch && !hasTauriSig) return null;
 
   let confidence = 'low';
+  if (hasTauriSig) confidence = 'high';
   if (hasWebView2 || (hasWebKitLink && hasBundledIndex)) confidence = 'high';
-  else if (hasBundledIndex) confidence = 'medium';
+  else if (hasWebKitLink || hasBundledIndex) confidence = 'medium';
 
   return {
     ...meta,
