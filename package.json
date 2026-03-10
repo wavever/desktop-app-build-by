@@ -1,0 +1,33 @@
+{
+  "name": "desktop-app-build-by",
+  "version": "1.0.0",
+  "description": "Detect the technology stack of desktop applications (Native vs Cross-platform)",
+  "type": "module",
+  "bin": {
+    "buildby": "./bin/buildby.js"
+  },
+  "scripts": {
+    "start": "node bin/buildby.js"
+  },
+  "keywords": [
+    "cli",
+    "desktop",
+    "app",
+    "tech-stack",
+    "electron",
+    "flutter",
+    "tauri"
+  ],
+  "author": "wavever",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.3",
+    "ora": "^9.3.0",
+    "plist": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
