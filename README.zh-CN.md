@@ -4,6 +4,10 @@
 
 可以快速看出一个应用是使用 **原生技术**（Swift、Objective‑C、Win32 等），还是使用 **跨平台框架**（Electron、Flutter、Tauri、Qt、JVM、CEF、NW.js、React Native、wxWidgets 等）构建的。
 
+## 截图
+![](/screenshot/img-app.png)
+![](/screenshot/img-scan.png)
+
 ### 安装
 
 ```bash

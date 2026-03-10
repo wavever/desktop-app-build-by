@@ -4,6 +4,10 @@ Detect the technology stack of desktop applications on macOS and Windows.
 
 Instantly see whether an app is built with **Native** technologies (Swift, Objective-C, Win32) or a **cross-platform** framework (Electron, Flutter, Tauri, Qt, JVM, CEF, etc.).
 
+## Screenshot
+![](/screenshot/img-app.png)
+![](/screenshot/img-scan.png)
+
 ## Install
 
 ```bash
@@ -84,25 +88,29 @@ buildby --path "C:\Program Files\SomeApp"
 
 ## Detected Tech Stacks
 
-| Stack | Description | Detection Method |
-|-------|-------------|-----------------|
-| ⚡ **Electron** | Node.js + Chromium | `Electron Framework.framework`, `app.asar` |
-| 🐦 **Flutter** | Google's UI toolkit | `FlutterMacOS.framework`, `flutter_windows.dll` |
-| 🌐 **CEF** | Chromium Embedded Framework | `Chromium Embedded Framework.framework`, `libcef.dll` |
-| 🦀 **Tauri** | Rust + system WebView | Binary strings + `resources/` dir, `WebView2Loader.dll` |
-| 🔷 **Qt** | C++ cross-platform | `Qt*.framework`, `Qt5Core.dll` / `Qt6Core.dll` |
-| ☕ **JVM** | Java/Kotlin/Scala | `jbr/`, `libjvm.dylib`, `.jar` files |
-| 🔵 **.NET** | Microsoft .NET / MAUI / WPF | `MonoBundle/`, `coreclr.dll`, `.dll` files |
-| 🟩 **NW.js** | Node.js + Chromium (node-webkit) | `nwjs Framework.framework`, `app.nw` |
-| ⚛️ **React Native** | Facebook's React for desktop | `React.framework`, `hermes.dll` |
-| 🖥️ **Native** | Platform-native technologies | Fallback when no cross-platform signatures found |
+
+| Stack               | Description                      | Detection Method                                        |
+| ------------------- | -------------------------------- | ------------------------------------------------------- |
+| ⚡ **Electron**      | Node.js + Chromium               | `Electron Framework.framework`, `app.asar`              |
+| 🐦 **Flutter**      | Google's UI toolkit              | `FlutterMacOS.framework`, `flutter_windows.dll`         |
+| 🌐 **CEF**          | Chromium Embedded Framework      | `Chromium Embedded Framework.framework`, `libcef.dll`   |
+| 🦀 **Tauri**        | Rust + system WebView            | Binary strings + `resources/` dir, `WebView2Loader.dll` |
+| 🔷 **Qt**           | C++ cross-platform               | `Qt*.framework`, `Qt5Core.dll` / `Qt6Core.dll`          |
+| ☕ **JVM**           | Java/Kotlin/Scala                | `jbr/`, `libjvm.dylib`, `.jar` files                    |
+| 🔵 **.NET**         | Microsoft .NET / MAUI / WPF      | `MonoBundle/`, `coreclr.dll`, `.dll` files              |
+| 🟩 **NW.js**        | Node.js + Chromium (node-webkit) | `nwjs Framework.framework`, `app.nw`                    |
+| ⚛️ **React Native** | Facebook's React for desktop     | `React.framework`, `hermes.dll`                         |
+| 🖥️ **Native**      | Platform-native technologies     | Fallback when no cross-platform signatures found        |
+
 
 ## Platform Support
 
-| Platform | App Discovery | Detection |
-|----------|--------------|-----------|
-| macOS | `/Applications`, `~/Applications` | Framework dirs, `otool -L`, plist metadata |
-| Windows | `Program Files`, `Program Files (x86)`, `AppData/Local/Programs` | DLL files, directory structure |
+
+| Platform | App Discovery                                                    | Detection                                  |
+| -------- | ---------------------------------------------------------------- | ------------------------------------------ |
+| macOS    | `/Applications`, `~/Applications`                                | Framework dirs, `otool -L`, plist metadata |
+| Windows  | `Program Files`, `Program Files (x86)`, `AppData/Local/Programs` | DLL files, directory structure             |
+
 
 ## How It Works
 
@@ -124,4 +132,5 @@ Detection runs in priority order so the most distinctive signatures are checked 
 - `otool` available (built into macOS Xcode CLT, used for Tauri detection)
 
 ## License
+
 MIT

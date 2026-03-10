@@ -8,17 +8,23 @@ import { detect as detectJVM, meta as jvmMeta } from './jvm.js';
 import { detect as detectDotNet, meta as dotnetMeta } from './dotnet.js';
 import { detect as detectNWJS, meta as nwjsMeta } from './nwjs.js';
 import { detect as detectReactNative, meta as reactnativeMeta } from './reactnative.js';
+import { detect as detectChromium, meta as chromiumMeta } from './chromium.js';
+import { detect as detectUnity, meta as unityMeta } from './unity.js';
 import { detect as detectNative, meta as nativeMeta } from './native.js';
 
-// Detection priority order: most distinctive signatures first
+// Detection priority order: most distinctive signatures first.
+// Unity must precede .NET (Unity bundles Mono assemblies that could trigger .NET).
+// Chromium must follow Electron/CEF/NW.js (they are more specific Chromium wrappers).
 const DETECTORS = [
   { meta: electronMeta, detect: detectElectron },
   { meta: flutterMeta, detect: detectFlutter },
   { meta: cefMeta, detect: detectCEF },
   { meta: nwjsMeta, detect: detectNWJS },
+  { meta: chromiumMeta, detect: detectChromium },
   { meta: reactnativeMeta, detect: detectReactNative },
   { meta: qtMeta, detect: detectQt },
   { meta: wxwidgetsMeta, detect: detectWxWidgets },
+  { meta: unityMeta, detect: detectUnity },
   { meta: jvmMeta, detect: detectJVM },
   { meta: dotnetMeta, detect: detectDotNet },
   { meta: tauriMeta, detect: detectTauri },
@@ -30,9 +36,11 @@ export const ALL_STACK_METAS = [
   flutterMeta,
   cefMeta,
   nwjsMeta,
+  chromiumMeta,
   reactnativeMeta,
   qtMeta,
   wxwidgetsMeta,
+  unityMeta,
   jvmMeta,
   dotnetMeta,
   tauriMeta,

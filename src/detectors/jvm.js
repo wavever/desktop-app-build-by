@@ -27,9 +27,13 @@ export function detect(appPath, platform) {
     if (fs.existsSync(path.join(contentsDir, 'jdk'))) {
       evidence.push('jdk/');
     }
-    // Java runtime lib
+    // Java runtime lib (legacy layout)
     if (fs.existsSync(path.join(contentsDir, 'runtime', 'jre'))) {
       evidence.push('runtime/jre/');
+    }
+    // jpackage layout: Contents/runtime/Contents/Home/ (JDK 14+)
+    if (fs.existsSync(path.join(contentsDir, 'runtime', 'Contents', 'Home'))) {
+      evidence.push('runtime/ (jpackage JDK)');
     }
 
     // libjvm.dylib in nested paths
@@ -37,6 +41,7 @@ export function detect(appPath, platform) {
       path.join(contentsDir, 'jbr', 'Contents', 'Home', 'lib', 'server', 'libjvm.dylib'),
       path.join(contentsDir, 'jre', 'lib', 'server', 'libjvm.dylib'),
       path.join(contentsDir, 'runtime', 'jre', 'lib', 'server', 'libjvm.dylib'),
+      path.join(contentsDir, 'runtime', 'Contents', 'Home', 'lib', 'server', 'libjvm.dylib'),
     ];
     for (const loc of jvmLocations) {
       if (fs.existsSync(loc)) {
@@ -59,6 +64,24 @@ export function detect(appPath, platform) {
       }
     }
 
+    // jpackage layout: Contents/app/ contains .jar files and .cfg config
+    const appDir = path.join(contentsDir, 'app');
+    if (fs.existsSync(appDir)) {
+      try {
+        const items = fs.readdirSync(appDir);
+        const jars = items.filter((item) => item.endsWith('.jar'));
+        const cfgs = items.filter((item) => item.endsWith('.cfg'));
+        if (jars.length > 0) {
+          evidence.push(`${jars.length} .jar files in app/ (jpackage)`);
+        }
+        if (cfgs.length > 0) {
+          evidence.push(`${cfgs[0]} (jpackage config)`);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     // Check plugins directory (JetBrains IDEs store .jar plugins here)
     // Must contain actual .jar files to avoid false positives (e.g. macOS PlugIns/ with .appex)
     const pluginsDir = path.join(contentsDir, 'plugins');
@@ -66,7 +89,6 @@ export function detect(appPath, platform) {
       try {
         const pluginItems = fs.readdirSync(pluginsDir);
         const hasJarPlugins = pluginItems.some((item) => {
-          // JetBrains plugin dirs contain lib/ subdirs with .jar files
           const libPath = path.join(pluginsDir, item, 'lib');
           if (fs.existsSync(libPath)) {
             try {
@@ -105,15 +127,17 @@ export function detect(appPath, platform) {
       }
     }
 
-    // .jar files
-    try {
-      const items = fs.readdirSync(path.join(appPath, 'lib'));
-      const jars = items.filter((item) => item.endsWith('.jar'));
-      if (jars.length > 0) {
-        evidence.push(`${jars.length} .jar files in lib/`);
+    // .jar files in lib/ or app/ (jpackage)
+    for (const dir of ['lib', 'app']) {
+      try {
+        const items = fs.readdirSync(path.join(appPath, dir));
+        const jars = items.filter((item) => item.endsWith('.jar'));
+        if (jars.length > 0) {
+          evidence.push(`${jars.length} .jar files in ${dir}/`);
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
   }
 

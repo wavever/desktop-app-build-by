@@ -162,15 +162,16 @@ export function detect(appPath, platform) {
   const hasTauriSig = evidence.some((e) => e.includes('Tauri framework signature'));
   const hasWebView2 = evidence.includes('WebView2Loader.dll');
 
-  // macOS: need (WebKit + index.html) or (WebKit + Tauri signature) or Tauri signature alone
-  // Windows: need WebView2
-  const macOSMatch = hasWebKitLink && (hasBundledIndex || hasTauriSig);
-  if (!hasWebView2 && !macOSMatch && !hasTauriSig) return null;
+  // Tauri signature in binary is the strongest signal.
+  // WebKit + index.html alone is NOT sufficient (many native apps use WKWebView + bundled HTML).
+  // macOS: require Tauri signature, optionally reinforced by WebKit/index.html
+  // Windows: require WebView2 + Tauri signature (WebView2 alone could be any WebView2 app)
+  if (!hasTauriSig && !hasWebView2) return null;
+  if (hasWebView2 && !hasTauriSig) return null;
 
-  let confidence = 'low';
-  if (hasTauriSig) confidence = 'high';
-  if (hasWebView2 || (hasWebKitLink && hasBundledIndex)) confidence = 'high';
-  else if (hasWebKitLink || hasBundledIndex) confidence = 'medium';
+  let confidence = 'high';
+  if (hasTauriSig && (hasWebKitLink || hasBundledIndex || hasWebView2)) confidence = 'high';
+  else if (hasTauriSig) confidence = 'medium';
 
   return {
     ...meta,

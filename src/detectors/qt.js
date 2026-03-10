@@ -30,29 +30,28 @@ export function detect(appPath, platform) {
 
     try {
       const items = fs.readdirSync(frameworksDir);
+
+      // Qt frameworks (e.g. QtCore.framework, Qt6Core.framework)
       for (const item of items) {
         if (item.startsWith('Qt') && item.endsWith('.framework')) {
           evidence.push(item);
-          if (evidence.length >= 3) break; // cap evidence list
+          if (evidence.length >= 3) break;
         }
       }
-      // Also check for qt.conf
+
+      // Some Qt apps ship Qt as dylib instead of framework
+      if (evidence.length === 0) {
+        const qtLibs = items.filter((item) => item.startsWith('libQt') && item.endsWith('.dylib'));
+        if (qtLibs.length > 0) {
+          evidence.push(...qtLibs.slice(0, 2));
+        }
+      }
+
       if (fs.existsSync(path.join(appPath, 'Contents', 'Resources', 'qt.conf'))) {
         evidence.push('qt.conf');
       }
     } catch {
       // no frameworks dir
-    }
-
-    // Some Qt apps ship Qt as dylib instead of framework
-    try {
-      const items = fs.readdirSync(frameworksDir);
-      const qtLibs = items.filter((item) => item.startsWith('libQt') && item.endsWith('.dylib'));
-      if (qtLibs.length > 0) {
-        evidence.push(...qtLibs.slice(0, 2));
-      }
-    } catch {
-      // ignore
     }
   } else if (platform === 'win32') {
     const qtDlls = [

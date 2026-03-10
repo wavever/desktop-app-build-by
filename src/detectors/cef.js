@@ -25,10 +25,9 @@ export function detect(appPath, platform) {
     }
     // Check helper apps for CEF pattern
     try {
-      const items = fs.readdirSync(frameworksDir).catch?.(() => []) ?? fs.readdirSync(frameworksDir);
+      const items = fs.readdirSync(frameworksDir);
       const hasCefHelper = items.some((item) => item.includes('Helper') && item.endsWith('.app'));
-      const hasCefFramework = evidence.length > 0;
-      if (hasCefHelper && hasCefFramework) {
+      if (hasCefHelper && evidence.length > 0) {
         evidence.push('CEF Helper apps');
       }
     } catch {
