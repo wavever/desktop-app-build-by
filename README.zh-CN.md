@@ -7,6 +7,9 @@
 ### 安装
 
 ```bash
+# 从 npm 安装
+npm i -g desktop-app-build-by
+
 # 克隆仓库并全局链接
 git clone <repo>
 cd desktop-app-build-by

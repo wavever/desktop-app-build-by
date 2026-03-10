@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "Detect the technology stack of desktop applications (Native vs Cross-platform)",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavever/desktop-app-build-by.git"
+  },
+  "homepage": "https://github.com/wavever/desktop-app-build-by#readme",
+  "bugs": {
+    "url": "https://github.com/wavever/desktop-app-build-by/issues"
+  },
   "bin": {
     "buildby": "./bin/buildby.js"
   },

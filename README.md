@@ -7,6 +7,9 @@ Instantly see whether an app is built with **Native** technologies (Swift, Objec
 ## Install
 
 ```bash
+# Install from npm
+npm i -g desktop-app-build-by
+
 # Clone and link globally
 git clone <repo>
 cd desktop-app-build-by
