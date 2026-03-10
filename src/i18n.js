@@ -63,6 +63,7 @@ const translations = {
     filter_found: '— {count} found',
     table_head_app: 'App',
     table_head_version: 'Version',
+    table_head_tech: 'Tech',
     table_head_path: 'Bundle ID / Path',
 
     // ── spinner / status messages (cli.js) ───────────────────────────────────
@@ -132,6 +133,7 @@ const translations = {
     filter_found: '— 共 {count} 个',
     table_head_app: '应用',
     table_head_version: '版本',
+    table_head_tech: '技术栈',
     table_head_path: 'Bundle ID / 路径',
 
     // ── spinner / status messages ─────────────────────────────────────────────

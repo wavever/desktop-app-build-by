@@ -2,6 +2,9 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 import { t, stackDesc } from './i18n.js';
 import { formatSize } from './analyzer.js';
+import { ALL_STACK_METAS } from './detectors/index.js';
+
+const META_NAME_MAP = new Map(ALL_STACK_METAS.map((m) => [m.id, m.name]));
 
 // Map stack id -> chalk color function
 const STACK_COLORS = {
@@ -120,7 +123,7 @@ export function printGroupedResults(groups, allResults) {
 
     const icon = STACK_ICONS[stackId] || '❓';
     const colorFn = STACK_COLORS[stackId] || chalk.white;
-    const stackName = apps[0].stackName;
+    const stackName = META_NAME_MAP.get(stackId) || apps[0].stackName;
     const percentage = ((apps.length / total) * 100).toFixed(1);
     const stat = t('scan_group_stat', { count: apps.length, pct: percentage });
     const totalSize = apps.reduce((sum, a) => sum + (a.sizeBytes || 0), 0);
@@ -128,6 +131,7 @@ export function printGroupedResults(groups, allResults) {
 
     console.log(`  ${icon} ${colorFn.bold(stackName)} ${chalk.dim(stat)}${sizeStr}`);
 
+    const showSubTech = stackId === 'native';
     const table = new Table({
       chars: {
         top: '', 'top-mid': '', 'top-left': '', 'top-right': '',
@@ -136,15 +140,25 @@ export function printGroupedResults(groups, allResults) {
         right: '', 'right-mid': '', middle: '  ',
       },
       style: { 'padding-left': 0, 'padding-right': 0, head: [], border: [] },
-      colWidths: [32, 12, 38],
+      colWidths: showSubTech ? [26, 10, 24, 22] : [32, 12, 38],
     });
 
     for (const app of apps) {
-      table.push([
-        colorFn(truncate(app.name, 30)),
-        chalk.dim(formatSize(app.sizeBytes)),
-        chalk.dim(truncate(app.path, 36)),
-      ]);
+      if (showSubTech) {
+        const subTech = extractSubTech(app.stackName);
+        table.push([
+          colorFn(truncate(app.name, 24)),
+          chalk.dim(formatSize(app.sizeBytes)),
+          chalk.cyan(truncate(subTech, 22)),
+          chalk.dim(truncate(app.path, 20)),
+        ]);
+      } else {
+        table.push([
+          colorFn(truncate(app.name, 30)),
+          chalk.dim(formatSize(app.sizeBytes)),
+          chalk.dim(truncate(app.path, 36)),
+        ]);
+      }
     }
 
     console.log(table.toString());
@@ -169,7 +183,8 @@ export function printFilteredResults(results, stackId) {
 
   const icon = STACK_ICONS[stackId] || '❓';
   const colorFn = STACK_COLORS[stackId] || chalk.white;
-  const stackName = results[0]?.stackName || stackId;
+  const stackName = META_NAME_MAP.get(stackId) || results[0]?.stackName || stackId;
+  const showSubTech = stackId === 'native';
 
   const title = t('filter_title', { icon, stack: colorFn(stackName) });
   const found = t('filter_found', { count: results.length });
@@ -177,13 +192,22 @@ export function printFilteredResults(results, stackId) {
   console.log();
   console.log(chalk.bold(`  ${title}`) + chalk.dim(` ${found}\n`));
 
+  const head = showSubTech
+    ? [
+        chalk.bold(t('table_head_app')),
+        chalk.bold(t('table_head_tech')),
+        chalk.bold(t('table_head_size')),
+        chalk.bold(t('table_head_path')),
+      ]
+    : [
+        chalk.bold(t('table_head_app')),
+        chalk.bold(t('table_head_version')),
+        chalk.bold(t('table_head_size')),
+        chalk.bold(t('table_head_path')),
+      ];
+
   const table = new Table({
-    head: [
-      chalk.bold(t('table_head_app')),
-      chalk.bold(t('table_head_version')),
-      chalk.bold(t('table_head_size')),
-      chalk.bold(t('table_head_path')),
-    ],
+    head,
     chars: {
       top: '─', 'top-mid': '┬', 'top-left': '  ┌', 'top-right': '┐',
       bottom: '─', 'bottom-mid': '┴', 'bottom-left': '  └', 'bottom-right': '┘',
@@ -191,16 +215,25 @@ export function printFilteredResults(results, stackId) {
       right: '│', 'right-mid': '┤', middle: ' │ ',
     },
     style: { head: [], border: [], 'padding-left': 1, 'padding-right': 1 },
-    colWidths: [26, 10, 10, 40],
+    colWidths: showSubTech ? [22, 22, 10, 32] : [26, 10, 10, 40],
   });
 
   for (const app of results.sort((a, b) => a.name.localeCompare(b.name))) {
-    table.push([
-      colorFn(truncate(app.name, 23)),
-      chalk.dim(app.metadata?.version || '—'),
-      chalk.dim(formatSize(app.sizeBytes)),
-      chalk.dim(app.metadata?.bundleId || truncate(app.path, 38)),
-    ]);
+    if (showSubTech) {
+      table.push([
+        colorFn(truncate(app.name, 19)),
+        chalk.cyan(truncate(extractSubTech(app.stackName), 20)),
+        chalk.dim(formatSize(app.sizeBytes)),
+        chalk.dim(app.metadata?.bundleId || truncate(app.path, 30)),
+      ]);
+    } else {
+      table.push([
+        colorFn(truncate(app.name, 23)),
+        chalk.dim(app.metadata?.version || '—'),
+        chalk.dim(formatSize(app.sizeBytes)),
+        chalk.dim(app.metadata?.bundleId || truncate(app.path, 38)),
+      ]);
+    }
   }
 
   console.log(table.toString());
@@ -223,7 +256,7 @@ function printSummaryBar(sortedGroups, total) {
     if (apps.length === 0) continue;
     const colorFn = STACK_COLORS[stackId] || chalk.white;
     const icon = STACK_ICONS[stackId] || ' ';
-    const stackName = apps[0].stackName;
+    const stackName = META_NAME_MAP.get(stackId) || apps[0].stackName;
     const ratio = apps.length / total;
     const filled = Math.round(ratio * BAR_WIDTH);
     const bar = '█'.repeat(filled) + '░'.repeat(BAR_WIDTH - filled);
@@ -259,6 +292,15 @@ export function printError(message) {
  */
 export function printWarning(message) {
   console.warn(chalk.yellow(`\n  ⚠ ${message}\n`));
+}
+
+/**
+ * Extract the sub-technology part from a native stackName.
+ * e.g. "Native (Swift · SwiftUI)" → "Swift · SwiftUI"
+ */
+function extractSubTech(stackName) {
+  const m = stackName?.match(/^Native\s*\((.+)\)$/);
+  return m ? m[1] : stackName || '';
 }
 
 /**
