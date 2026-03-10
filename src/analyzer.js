@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
 import { detectStack } from './detectors/index.js';
+import { LOCALE } from './i18n.js';
 
 /**
  * Get the disk usage of an app directory in bytes.
@@ -84,6 +85,48 @@ function readPlistMetadata(appPath) {
 }
 
 /**
+ * Read localized display name from .lproj/InfoPlist.strings.
+ * macOS apps store per-language overrides of CFBundleDisplayName / CFBundleName
+ * inside Contents/Resources/<lang>.lproj/InfoPlist.strings (often binary plist).
+ * @param {string} appPath
+ * @returns {string | null}
+ */
+function readLocalizedDisplayName(appPath) {
+  const resourcesDir = path.join(appPath, 'Contents', 'Resources');
+
+  const lprojCandidates = LOCALE === 'zh'
+    ? ['zh-Hans.lproj', 'zh_CN.lproj', 'zh-Hant.lproj', 'zh_TW.lproj', 'zh_HK.lproj']
+    : [];
+
+  if (lprojCandidates.length === 0) return null;
+
+  for (const lproj of lprojCandidates) {
+    const stringsFile = path.join(resourcesDir, lproj, 'InfoPlist.strings');
+    if (!fs.existsSync(stringsFile)) continue;
+
+    try {
+      const xml = execFileSync('plutil', ['-convert', 'xml1', '-o', '-', stringsFile], {
+        timeout: 3000,
+        maxBuffer: 256 * 1024,
+      }).toString();
+
+      const extractFromXml = (key) => {
+        const re = new RegExp(`<key>${key}<\\/key>\\s*<string>([^<]+)<\\/string>`);
+        const m = xml.match(re);
+        return m ? m[1] : undefined;
+      };
+
+      const name = extractFromXml('CFBundleDisplayName') || extractFromXml('CFBundleName');
+      if (name) return name;
+    } catch {
+      // plutil failed or file unreadable — try next candidate
+    }
+  }
+
+  return null;
+}
+
+/**
  * Get app icon path (for display purposes).
  * @param {string} appPath
  * @param {string} platform
@@ -113,10 +156,11 @@ export function analyzeApp(app) {
 
   const detection = detectStack(appPath, platform);
   const metadata = platform === 'darwin' ? readPlistMetadata(appPath) : null;
+  const localizedName = platform === 'darwin' ? readLocalizedDisplayName(appPath) : null;
   const sizeBytes = getAppSize(appPath);
 
   return {
-    name: metadata?.displayName || name,
+    name: localizedName || metadata?.displayName || name,
     path: appPath,
     platform,
     stack: detection.id,

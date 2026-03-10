@@ -1,15 +1,10 @@
+import { execFileSync } from 'child_process';
+
 /**
  * Detect whether the system language is Chinese.
- * Checks (in order): LANG env var, LC_ALL, LC_MESSAGES, Intl API.
+ * Checks (in order): env vars, Intl API, macOS system preferences.
  */
 function detectLocale() {
-  // Intl API is the most reliable on modern Node.js
-  try {
-    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (locale.startsWith('zh')) return 'zh';
-  } catch {
-    // ignore
-  }
   const envLang =
     process.env.LANG ||
     process.env.LC_ALL ||
@@ -17,6 +12,28 @@ function detectLocale() {
     process.env.LANGUAGE ||
     '';
   if (envLang.toLowerCase().startsWith('zh')) return 'zh';
+
+  try {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    if (locale.startsWith('zh')) return 'zh';
+  } catch {
+    // ignore
+  }
+
+  // macOS: some terminals (e.g. IDE-embedded) don't propagate locale env vars.
+  // Fall back to reading the actual system preference.
+  if (process.platform === 'darwin') {
+    try {
+      const appleLocale = execFileSync('defaults', ['read', '-g', 'AppleLocale'], {
+        timeout: 2000,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).toString().trim();
+      if (appleLocale.toLowerCase().startsWith('zh')) return 'zh';
+    } catch {
+      // ignore
+    }
+  }
+
   return 'en';
 }
 
