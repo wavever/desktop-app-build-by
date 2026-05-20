@@ -16,7 +16,7 @@ Beyond the tech stack, `buildby` also reports each app's **signature & notarizat
 
 ```bash
 # Install from npm
-npm i -g buildby
+npm i -g @wavever/buildby
 
 # Clone and link globally
 git clone https://github.com/wavever/buildby.git
@@ -28,7 +28,7 @@ npm link
 node bin/buildby.js <command>
 ```
 
-> Previously published as `desktop-app-build-by`. That name is now **deprecated** — please switch to `npm i -g buildby`. See [CHANGELOG.md](./CHANGELOG.md) for details.
+> Previously published as `desktop-app-build-by`. That name is now **deprecated** — please switch to `npm i -g @wavever/buildby`. The CLI command stays `buildby`. See [CHANGELOG.md](./CHANGELOG.md) for details.
 
 ## Usage
 

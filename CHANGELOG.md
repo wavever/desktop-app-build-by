@@ -8,13 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Renamed
 
-- **The npm package has been renamed from `desktop-app-build-by` to `buildby`.**
-  Future installs should use:
+- **The npm package has been renamed from `desktop-app-build-by` to
+  `@wavever/buildby`** (a scoped package). Future installs should use:
 
   ```bash
-  npm i -g buildby
+  npm i -g @wavever/buildby
   ```
 
+  npm's name-similarity check rejected the unscoped name `buildby` (too close
+  to the existing `build` package), so the scoped form is the long-term home.
   The old package (`desktop-app-build-by`) is now deprecated on npm. Users who
   installed it will see a deprecation notice pointing to this new package. The
   CLI command remains `buildby`, so no usage changes are needed after switching.

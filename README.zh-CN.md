@@ -16,7 +16,7 @@
 
 ```bash
 # 从 npm 安装
-npm i -g buildby
+npm i -g @wavever/buildby
 
 # 克隆仓库并全局链接
 git clone https://github.com/wavever/buildby.git
@@ -28,7 +28,7 @@ npm link
 node bin/buildby.js <command>
 ```
 
-> 早期发布名为 `desktop-app-build-by`，现已**弃用**，请改用 `npm i -g buildby`。详情见 [CHANGELOG.md](./CHANGELOG.md)。
+> 早期发布名为 `desktop-app-build-by`，现已**弃用**，请改用 `npm i -g @wavever/buildby`。CLI 命令保持为 `buildby`。详情见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ### 用法
 
