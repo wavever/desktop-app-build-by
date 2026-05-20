@@ -16,17 +16,19 @@
 
 ```bash
 # 从 npm 安装
-npm i -g desktop-app-build-by
+npm i -g buildby
 
 # 克隆仓库并全局链接
-git clone <repo>
-cd desktop-app-build-by
+git clone https://github.com/wavever/buildby.git
+cd buildby
 npm install
 npm link
 
 # 或直接运行
 node bin/buildby.js <command>
 ```
+
+> 早期发布名为 `desktop-app-build-by`，现已**弃用**，请改用 `npm i -g buildby`。详情见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ### 用法
 

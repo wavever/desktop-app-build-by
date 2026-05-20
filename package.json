@@ -1,15 +1,15 @@
 {
-  "name": "desktop-app-build-by",
-  "version": "1.0.2",
-  "description": "Detect the technology stack of desktop applications (Native vs Cross-platform)",
+  "name": "buildby",
+  "version": "1.1.0",
+  "description": "Detect the technology stack, code signature, and notarization status of desktop applications (Native vs Cross-platform)",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wavever/desktop-app-build-by.git"
+    "url": "git+https://github.com/wavever/buildby.git"
   },
-  "homepage": "https://github.com/wavever/desktop-app-build-by#readme",
+  "homepage": "https://github.com/wavever/buildby#readme",
   "bugs": {
-    "url": "https://github.com/wavever/desktop-app-build-by/issues"
+    "url": "https://github.com/wavever/buildby/issues"
   },
   "bin": {
     "buildby": "bin/buildby.js"
@@ -24,7 +24,10 @@
     "tech-stack",
     "electron",
     "flutter",
-    "tauri"
+    "tauri",
+    "codesign",
+    "notarization",
+    "authenticode"
   ],
   "author": "wavever",
   "license": "MIT",

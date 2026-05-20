@@ -1,0 +1,84 @@
+# Changelog
+
+All notable changes to this project are documented here. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
+follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.0] — 2026-05-21
+
+### Renamed
+
+- **The npm package has been renamed from `desktop-app-build-by` to `buildby`.**
+  Future installs should use:
+
+  ```bash
+  npm i -g buildby
+  ```
+
+  The old package (`desktop-app-build-by`) is now deprecated on npm. Users who
+  installed it will see a deprecation notice pointing to this new package. The
+  CLI command remains `buildby`, so no usage changes are needed after switching.
+- The GitHub repository has been renamed from `wavever/desktop-app-build-by` to
+  `wavever/buildby`. GitHub auto-redirects all old URLs, but you may want to
+  update any local clones:
+
+  ```bash
+  git remote set-url origin https://github.com/wavever/buildby.git
+  ```
+
+### Added (inherited from 1.0.2)
+
+- **Signature & notarization detection.** Single-app inspection
+  (`buildby <name>` and `--path`) now shows a new section listing:
+  - Developer name (parsed from the codesign authority) and Team ID
+  - Signature status — Signed / Ad-hoc / Unsigned
+  - Notarization status — Notarized / Apple System / Mac App Store /
+    Not notarized / Rejected
+  - Hardened Runtime flag
+- **Windows Authenticode support.** On Windows, `buildby` invokes PowerShell
+  `Get-AuthenticodeSignature` to extract the publisher (from the certificate
+  CN/O) and the signature status (Valid, NotSigned, etc.).
+- Bilingual (en / zh) labels for the new section.
+
+### Notes
+
+- Signature extraction is opt-in (`analyzeApp(app, { includeSignature: true })`)
+  and only runs in the detail-view code paths. `--scan` and `--<stack>` filter
+  performance is unchanged.
+- The detail view falls back to `codesign`'s `Notarization Ticket=stapled`
+  marker if `spctl` is unavailable or times out.
+
+## [1.0.2] — 2026-05-20
+
+### Added
+
+- Code signature, developer/team, and notarization detection scaffolding
+  (released to npm but feature was introduced one version early; see 1.1.0).
+
+### Fixed
+
+- Dropped leading `./` from the `bin` entry in `package.json` to silence
+  an `npm publish` warning under npm 11.
+
+## [1.0.1] — 2026-03-11
+
+### Changed
+
+- Enhanced tech-stack detection and display formatting.
+- Improved macOS native app detection (Swift / SwiftUI sub-tech surfacing).
+- Added localized app display name support on macOS via `InfoPlist.strings`.
+- Added Tauri signature detection via binary string scanning.
+
+## [1.0.0] — 2026-03-10
+
+### Added
+
+- Initial release. Detection for Electron, Flutter, CEF, Chromium, Tauri, Qt,
+  wxWidgets, JVM (Java/Kotlin/Scala), .NET, NW.js, React Native, Unity, and
+  Native (Swift/Objective-C, Win32/WinUI) apps.
+- `buildby <name>` — fuzzy-match single-app inspection.
+- `buildby --scan` — scan all installed apps, grouped by tech stack with a
+  distribution chart.
+- `buildby --<stack>` — filter by tech stack (e.g. `--electron`, `--flutter`).
+- `buildby --path <dir>` — inspect a custom path.
+- Bilingual (en / zh) output.
