@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -39,6 +40,22 @@ jobs:
         run: |
           mkdir -p dist
           npm pack --pack-destination dist
+
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "@wavever:registry=https://npm.pkg.github.com" >> "$HOME/.npmrc"
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc"
+
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} already exists in GitHub Packages; skipping publish."
+          else
+            npm publish --registry=https://npm.pkg.github.com
+          fi
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
