@@ -11,6 +11,13 @@
   "bugs": {
     "url": "https://github.com/wavever/buildby/issues"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "screenshot/",
+    "README.zh-CN.md",
+    "CHANGELOG.md"
+  ],
   "bin": {
     "buildby": "bin/buildby.js"
   },
