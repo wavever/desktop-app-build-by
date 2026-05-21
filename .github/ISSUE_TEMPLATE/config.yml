@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/wavever/buildby/discussions
+    about: Use GitHub Discussions for usage questions, ideas, and project feedback.

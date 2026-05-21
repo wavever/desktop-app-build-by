@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a problem with buildby detection or CLI behavior.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran.
+      placeholder: buildby discord
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Paste the relevant output or error message.
+      render: text
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: macOS 15.5 / Windows 11
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: node -v
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Screenshots, app path, or anything else that helps reproduce the issue.
